@@ -101,6 +101,32 @@ class XMLFeedParser: NSObject, XMLParserDelegate, FeedParserProtocol {
         
     }
     
+    func parseConcurrently() async throws -> Feed {
+        let _ = self.xmlParser.parse()
+        
+        if let error = parsingError {
+            throw ParserError.internalError(reason: error.localizedDescription)
+        }
+        
+        guard let feedType = feedType else {
+            throw ParserError.feedNotFound
+        }
+        
+        switch feedType {
+        case .atom:
+            guard let atomFeed = atomFeed else {
+                throw ParserError.internalError(reason: "Unable to initialize atom feed model")
+            }
+            return .atom(atomFeed)
+        case .rdf, .rss:
+            guard let rssFeed = rssFeed else {
+                throw ParserError.internalError(reason: "Unable to initialize rss feed model")
+            }
+            return .rss(rssFeed)
+        }
+        
+    }
+    
     /// Redirects characters found between XML elements to their proper model
     /// mappers based on the `currentXMLDOMPath`.
     ///

@@ -28,4 +28,5 @@ import Foundation
 protocol FeedParserProtocol {
     init(data: Data)
     func parse() -> Result<Feed, ParserError>
+    func parseConcurrently() async throws -> Feed
 }

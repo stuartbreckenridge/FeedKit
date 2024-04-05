@@ -48,4 +48,15 @@ class JSONFeedParser: FeedParserProtocol {
         
     }
     
+    func parseConcurrently() async throws -> Feed {
+        do {
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .formatted(RFC3339DateFormatter())
+            let decoded = try decoder.decode(JSONFeed.self, from: data)
+            return .json(decoded)
+        } catch {
+            throw ParserError.internalError(reason: error.localizedDescription)
+        }
+    }
+    
 }

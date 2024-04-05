@@ -1,14 +1,14 @@
-// swift-tools-version:5.0
+// swift-tools-version:5.9
 
 import PackageDescription
 
 let package = Package(
     name: "FeedKit",
     platforms: [
-        .macOS(.v10_12),
-        .iOS(.v10),
-        .tvOS(.v10),
-        .watchOS(.v3)
+        .macOS(.v14),
+        .iOS(.v17),
+        .tvOS(.v17),
+        .watchOS(.v10)
     ],
     products: [
         .library(name: "FeedKit", targets: ["FeedKit"]),

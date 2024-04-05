@@ -45,7 +45,7 @@ public class FeedParser {
         self.url = URL
     }
     
-    /// Initializes the parser with the xml or json contents encapsulated in a 
+    /// Initializes the parser with the xml or json contents encapsulated in a
     /// given data object.
     ///
     /// - Parameter data: XML or JSON data
@@ -98,6 +98,40 @@ public class FeedParser {
         
         return .failure(.internalError(reason: "Fatal error. Unable to parse from the initialized state."))
         
+    }
+    
+    public func parseConcurrently() async throws -> Feed {
+        if let url = url {
+            guard let sanitizedSchemeUrl = url.replacing(scheme: "feed", with: "http") else {
+                throw ParserError.internalError(reason: "Failed URL Sanitisation")
+            }
+            
+            do {
+                data = try Data(contentsOf: sanitizedSchemeUrl)
+            } catch {
+                throw ParserError.internalError(reason: error.localizedDescription)
+            }
+        }
+            
+        if let data = data {
+            guard let feedDataType = FeedDataType(data: data) else {
+                throw ParserError.feedNotFound
+            }
+            switch feedDataType {
+            case .xml:
+                parser = XMLFeedParser(data: data)
+            case .json:
+                parser = JSONFeedParser(data: data)
+            }
+            return try await parser!.parseConcurrently()
+        }
+            
+        if let xmlStream = xmlStream {
+            parser = XMLFeedParser(stream: xmlStream)
+            return try await parser!.parseConcurrently()
+        }
+            
+        throw ParserError.internalError(reason: "Fatal error. Unable to parse from the initialized state.")
     }
     
     /// Starts parsing the feed asynchronously. Parsing runs by default on the
